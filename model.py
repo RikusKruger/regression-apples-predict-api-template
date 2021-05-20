@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import json
+from sklearn.preprocessing import Normalizer
 
 def _preprocess_data(data):
     """Private helper function to preprocess data for model prediction.
@@ -62,8 +63,23 @@ def _preprocess_data(data):
     
 
     feature_vector_df = feature_vector_df[(feature_vector_df['Commodities'] == 'APPLE GOLDEN DELICIOUS')]
-    predict_vector = feature_vector_df[['Total_Qty_Sold','Stock_On_Hand']]
-                                
+    # Create Dictionary to hold new numerical ranking values
+    size_grade_rank = {'1U' : 1,
+                       '2S' : 2,
+                       '2U' : 3,
+                       '2X' : 4,
+                       '2M' : 5,
+                       '2L' : 6,
+                       '1S' : 7,
+                       '1M' : 8,
+                       '1L' : 9,
+                       '1X' : 10}
+
+    # Replace values according to dict
+    feature_vector_df.replace({"Size_Grade": size_grade_rank}, inplace=True)
+    scaler = Normalizer()
+    X_scaled = scaler.fit_transform(feature_vector_df[['Size_Grade','Weight_Kg', 'Low_Price', 'High_Price', 'Sales_Total', 'Total_Qty_Sold', 'Total_Kg_Sold']])
+    predict_vector = X_scaled                            
     # ------------------------------------------------------------------------
 
     return predict_vector
